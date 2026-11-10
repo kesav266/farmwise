@@ -1,15 +1,15 @@
-
 import os
 from pathlib import Path
 
 from dotenv import load_dotenv
-# Load environment variables before importing backend routers.
 load_dotenv()
 
 from fastapi import Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
+from backend.database import Base, engine
+from backend import models
 from backend.routers.auth import router as auth_router
 from backend.routers.requirements import router as requirements_router
 from backend.routers.inventory import router as inventory_router
@@ -19,13 +19,8 @@ from backend.routers.stores import router as stores_router
 from backend.routers.farmers import router as farmer_router
 from backend.routers.admin import router as admin_router
 from backend.routers.admin_dealers import router as admin_dealers_router
-
-
 from backend.dependencies import get_current_user, require_role
-from backend.database import Base, engine
-from backend import models
 from backend.models.user import User
-
 
 app = FastAPI(
     title="Smart Urea Management System",
@@ -44,22 +39,14 @@ configured_origins = os.getenv(
     "http://localhost:8000,http://127.0.0.1:8000",
 )
 
-
-# CORS configuration for frontend communication
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        origin.strip()
-        for origin in configured_origins.split(",")
-        if origin.strip()
-    ],
+    allow_origins=[origin.strip() for origin in configured_origins.split(",") if origin.strip()],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-
-# Register API routers
 app.include_router(auth_router)
 app.include_router(requirements_router)
 app.include_router(inventory_router)
@@ -70,11 +57,8 @@ app.include_router(farmer_router)
 app.include_router(admin_router)
 app.include_router(admin_dealers_router)
 
-# Create missing tables for ephemeral deployments. Persistent production data
-# should use a managed PostgreSQL DATABASE_URL.
 Base.metadata.create_all(bind=engine)
 
-# Home endpoint
 @app.get("/api")
 def home():
     return {
@@ -83,18 +67,12 @@ def home():
         "version": "1.0.0",
     }
 
-
-# Health check endpoint
 @app.get("/health")
 def health_check():
     return {"status": "healthy"}
 
-
-# Protected endpoint: returns the currently logged-in user
 @app.get("/auth/me", tags=["Authentication"])
-def read_current_user(
-    current_user: User = Depends(get_current_user),
-):
+def read_current_user(current_user: User = Depends(get_current_user)):
     return {
         "id": current_user.id,
         "full_name": current_user.full_name,
@@ -102,18 +80,13 @@ def read_current_user(
         "role": current_user.role,
     }
 
-
-# Test endpoint: only dealers can access this
 @app.get("/test/dealer-only", tags=["Role-Based Access"])
-def dealer_only_test(
-    current_user: User = Depends(require_role("dealer")),
-):
+def dealer_only_test(current_user: User = Depends(require_role("dealer"))):
     return {
         "message": "Dealer access granted!",
         "user": current_user.full_name,
         "role": current_user.role,
     }
-
 
 app.mount(
     "/",
