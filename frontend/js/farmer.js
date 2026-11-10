@@ -1,6 +1,6 @@
 const CONFIG = window.FARMWISE_CONFIG;
 
-if (!CONFIG?.apiBaseUrl) {
+if (!CONFIG || typeof CONFIG.apiBaseUrl !== "string") {
     throw new Error("FarmWise configuration is missing.");
 }
 
