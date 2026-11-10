@@ -1,11 +1,14 @@
 
-from dotenv import load_dotenv
+import os
+from pathlib import Path
 
+from dotenv import load_dotenv
 # Load environment variables before importing backend routers.
 load_dotenv()
 
-from fastapi import FastAPI, Depends
+from fastapi import Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 
 from backend.routers.auth import router as auth_router
 from backend.routers.requirements import router as requirements_router
@@ -32,15 +35,21 @@ app = FastAPI(
     version="1.0.0",
 )
 
+FRONTEND_DIR = Path(__file__).resolve().parent.parent / "frontend"
+configured_origins = os.getenv(
+    "ALLOWED_ORIGINS",
+    "http://localhost:5500,http://127.0.0.1:5500,"
+    "http://localhost:8000,http://127.0.0.1:8000",
+)
+
 
 # CORS configuration for frontend communication
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
-        "http://localhost:5500",
-        "http://127.0.0.1:5500",
-        "http://localhost:8000",
-        "http://127.0.0.1:8000",
+        origin.strip()
+        for origin in configured_origins.split(",")
+        if origin.strip()
     ],
     allow_credentials=True,
     allow_methods=["*"],
@@ -60,7 +69,7 @@ app.include_router(admin_router)
 app.include_router(admin_dealers_router)
 
 # Home endpoint
-@app.get("/")
+@app.get("/api")
 def home():
     return {
         "message": "Smart Urea Management System API is running",
@@ -98,3 +107,10 @@ def dealer_only_test(
         "user": current_user.full_name,
         "role": current_user.role,
     }
+
+
+app.mount(
+    "/",
+    StaticFiles(directory=FRONTEND_DIR, html=True),
+    name="frontend",
+)

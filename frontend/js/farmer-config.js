@@ -4,7 +4,11 @@
  * Do not store dealer, inventory, or store records here.
  */
 window.FARMWISE_CONFIG = Object.freeze({
-    apiBaseUrl: "http://127.0.0.1:8000",
+    apiBaseUrl: window.API_BASE_URL || (
+        window.location.port === "5500"
+            ? "http://127.0.0.1:8001"
+            : ""
+    ),
 
     lowStockThresholdKg: 100,
     earthRadiusKm: 6371,

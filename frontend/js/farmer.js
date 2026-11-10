@@ -386,7 +386,7 @@ async function farmerRequest(path) {
     const response = await fetch(`${FARMER_API_BASE}${path}`, {
         method: "GET",
         headers: {
-            Authorization: `Bearer ${token}`,
+            Authorization: "Bearer " + token,
             Accept: "application/json"
         }
     });

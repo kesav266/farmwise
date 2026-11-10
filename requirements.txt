@@ -12,3 +12,4 @@ scikit-learn
 plotly
 httpx
 pytest
+psycopg[binary]

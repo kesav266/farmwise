@@ -11,7 +11,10 @@
 /* ---------- CONFIGURATION ---------- */
 
 const API_BASE = (
-    window.API_BASE_URL || "http://127.0.0.1:8000"
+    window.API_BASE_URL ||
+    (window.location.port === "5500"
+        ? "http://127.0.0.1:8001"
+        : "")
 ).replace(/\/+$/, "");
 
 const getToken = () => sessionStorage.getItem("access_token");
@@ -87,7 +90,7 @@ async function apiRequest(path, options = {}) {
     const token = getToken();
 
     if (token) {
-        headers.Authorization = `Bearer ${token}`;
+        headers.Authorization = "Bearer " + token;
     }
 
     const response = await fetch(`${API_BASE}${path}`, {
