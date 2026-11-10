@@ -7,7 +7,9 @@ from sqlalchemy.orm import declarative_base, sessionmaker
 # Load environment variables from the root .env file
 load_dotenv()
 
-DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./urea_management.db")
+DATABASE_URL = os.getenv("NEON_DATABASE_URL") or os.getenv(
+    "DATABASE_URL", "sqlite:///./urea_management.db"
+)
 
 # Render supplies PostgreSQL URLs using the ``postgres://`` form. SQLAlchemy
 # needs an explicit psycopg driver for PostgreSQL connections.
