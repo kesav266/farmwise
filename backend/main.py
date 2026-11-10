@@ -22,6 +22,8 @@ from backend.routers.admin_dealers import router as admin_dealers_router
 
 
 from backend.dependencies import get_current_user, require_role
+from backend.database import Base, engine
+from backend import models
 from backend.models.user import User
 
 
@@ -67,6 +69,10 @@ app.include_router(stores_router)
 app.include_router(farmer_router)
 app.include_router(admin_router)
 app.include_router(admin_dealers_router)
+
+# Create missing tables for ephemeral deployments. Persistent production data
+# should use a managed PostgreSQL DATABASE_URL.
+Base.metadata.create_all(bind=engine)
 
 # Home endpoint
 @app.get("/api")
