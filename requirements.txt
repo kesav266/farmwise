@@ -13,3 +13,4 @@ plotly
 httpx
 pytest
 psycopg[binary]
+python-dotenv
